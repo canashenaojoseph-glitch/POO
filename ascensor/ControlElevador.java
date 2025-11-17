@@ -17,7 +17,7 @@ public class ControlElevador {
 
     public int getTotalPisos() { return totalPisos; }
 
-    // Flujo completo: asignar elevador, mover a usuario, preguntar destino y mover al destino
+
     public void procesarSolicitudPiso(int numeroPiso, Scanner scanner) {
         if (numeroPiso < 1 || numeroPiso > totalPisos) {
             System.out.println("Piso inválido.");
@@ -33,14 +33,14 @@ public class ControlElevador {
             return;
         }
 
-        // Mover elevador hasta el piso del usuario
+
         elegido.moverHasta(numeroPiso);
 
-        // Al llegar: apagar botón y mostrar mensaje
+
         apagarBotonPiso(numeroPiso);
         System.out.println("Botón del piso " + numeroPiso + " apagado");
 
-        // Preguntar destino desde dentro del ascensor
+
         System.out.print("¿A qué piso desea ir? (1-" + totalPisos + "): ");
         String s = scanner.nextLine().trim();
         int destino;
@@ -60,7 +60,6 @@ public class ControlElevador {
         System.out.println("El ascensor recuerda que quedó en el piso " + elegido.getPisoActual());
     }
 
-    // Política inteligente mejorada: 1) mismo dirección/camino, 2) último movimiento compatible, 3) detenido cercano, 4) cualquiera
     public Elevador encontrarMejorElevador(int pisoSolicitud) {
         String dirSolicitud = calcularDireccionAutomatica(pisoSolicitud);
         
@@ -74,7 +73,6 @@ public class ControlElevador {
             }
         }
         
-        // 2. Ascensores detenidos cuyo último movimiento fue compatible (p. ej., si están arriba y bajaban)
         Elevador mejor = null;
         int mejorDist = Integer.MAX_VALUE;
         for (Elevador e : elevadores) {
@@ -93,7 +91,6 @@ public class ControlElevador {
         }
         if (mejor != null) return mejor;
         
-        // 3. Ascensores detenidos (sin compatibilidad de última dirección), elegir cercano
         mejor = null;
         mejorDist = Integer.MAX_VALUE;
         for (Elevador e : elevadores) {
@@ -107,7 +104,6 @@ public class ControlElevador {
         }
         if (mejor != null) return mejor;
         
-        // 4. Cualquier ascensor (última opción): elegir el más cercano
         mejor = null;
         mejorDist = Integer.MAX_VALUE;
         for (Elevador e : elevadores) {
@@ -120,7 +116,6 @@ public class ControlElevador {
         return mejor;
     }
     
-    // Calcular dirección automática según la política original
     private String calcularDireccionAutomatica(int piso) {
         if (piso == 1) return "SUBIR";
         if (piso == totalPisos) return "BAJAR";
