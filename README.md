@@ -57,6 +57,9 @@ diagrama usado :
 <img width="1443" height="703" alt="Captura de pantalla (364)" src="https://github.com/user-attachments/assets/82c742fa-feea-4e21-a610-fdea8b8b28f2" />
 
 ejemplo de funcionamiento : 
+<img width="1650" height="871" alt="Captura de pantalla (365)" src="https://github.com/user-attachments/assets/b54e03f3-dd5c-4ee9-be36-c3778e86dd0f" />
+
+
 
 
 
