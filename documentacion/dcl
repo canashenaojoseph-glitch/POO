@@ -1,0 +1,348 @@
+// SISTEMA DE ASCENSORES - Proyecto POO
+// Estudiante: joseph cañas henao
+
+// Este sistema simula el funcionamiento de un ascensor en un eduificio al principio buscaba que fuera mas de un ascensor pero no pude por el momento 
+// funciona con un solo ascensor y un numero de pisos definido predeterminado.
+
+
+// BOTON.java - Clase abstracta para botones del sistema
+
+///
+  //Clase base para todos los botones del sistema.
+ // usé abstracción aquí porque todos los botones comparten funcionalidad básica: tener un piso y poder iluminarse.
+ 
+public abstract class Boton {
+    protected int piso;           // El piso asociado a este botón
+    protected boolean iluminado = false;  // Si está encendido o no
+
+     // Constructor - inicializa el botón con un piso específico
+     // @param piso El número de piso que representa este botón
+     //
+    public Boton(int piso) {
+        this.piso = piso;
+    }
+
+    // Getters básicos
+    public int getPiso() { return piso; }
+    public boolean isIluminado() { return iluminado; }
+
+    /////
+     // Enciende la luz del botón - se llama cuando alguien lo presiona
+     ///
+    public void encender() { 
+        iluminado = true; 
+        System.out.println("Botón del piso " + piso + " se encendió");
+    }
+
+    //
+     // Apaga la luz del botón - se llama cuando el ascensor llega
+    /
+    public void apagar() { 
+        iluminado = false; 
+        System.out.println("Botón del piso " + piso + " se apagó");
+    }
+}
+
+
+// ELEVADOR.java - Clase que representa un ascensor individual
+
+/////
+ // Representa un ascensor con su estado actual y comportamiento.
+ // Esta clase me costó mucho porque tuve que pensar en todos los estados
+ // posibles de un ascensor y cómo transicionar entre ellos.
+ ///
+public class Elevador {
+    /////
+     // Direcciones posibles del ascensor.
+     // Usé enum porque es más seguro que strings y más claro que números.
+     ///
+    public enum Direccion {SUBIENDO, BAJANDO, DETENIDO}
+
+    private final int id;                 // Identificador único
+    private int pisoActual;               // Piso donde está actualmente
+    private Direccion direccion = Direccion.DETENIDO;  // Dirección actual
+    private Direccion ultimaDireccion = Direccion.DETENIDO; // Para recordar el último movimiento
+    private final Puerta puerta = new Puerta();  // La puerta del ascensor
+
+    /////
+     // Constructor - crea un nuevo ascensor
+     // @param id Número identificador
+     // @param pisoInicial Piso donde empieza (generalmente 1)
+     ///
+    public Elevador(int id, int pisoInicial) {
+        this.id = id;
+        this.pisoActual = pisoInicial;
+        System.out.println("Ascensor " + id + " creado en piso " + pisoInicial);
+    }
+
+    // Getters para que el control pueda tomar decisiones
+    public int getId() { return id; }
+    public int getPisoActual() { return pisoActual; }
+    public Direccion getDireccion() { return direccion; }
+    public Direccion getUltimaDireccion() { return ultimaDireccion; }
+
+    // Métodos para controlar la puerta
+    public void abrirPuerta() { puerta.abrir(); }
+    public void cerrarPuerta() { puerta.cerrar(); }
+
+    /////
+     // Mueve el ascensor a un piso destino mostrando el progreso
+     // @param destino Piso al que debe llegar el ascensor
+     // 
+     // Esta función fue difícil porque tuve que simular el movimiento
+     // piso por piso en lugar de teleportarse directamente.
+     ///
+    public void moverHasta(int destino) {
+        // Si ya está en el destino, solo abrir y cerrar puertas
+        if (destino == pisoActual) {
+            System.out.println("Ascensor " + id + ": ya está en el piso " + pisoActual);
+            abrirPuerta();
+            cerrarPuerta();
+            return;
+        }
+
+        // Determinar dirección del movimiento
+        if (destino > pisoActual) {
+            direccion = Direccion.SUBIENDO;
+            System.out.println("Ascensor " + id + ": comenzando a SUBIR desde piso " + pisoActual);
+        } else {
+            direccion = Direccion.BAJANDO;
+            System.out.println("Ascensor " + id + ": comenzando a BAJAR desde piso " + pisoActual);
+        }
+
+        // Guardar esta dirección para decisiones futuras
+        ultimaDireccion = direccion;
+
+        // Movimiento piso por piso (simulación realista)
+        while (pisoActual != destino) {
+            if (direccion == Direccion.SUBIENDO) {
+                pisoActual++;
+                System.out.println("Ascensor " + id + ": subiendo al piso " + pisoActual + "...");
+            } else {
+                pisoActual--;
+                System.out.println("Ascensor " + id + ": bajando al piso " + pisoActual + "...");
+            }
+            
+            // Pequeña pausa para hacerlo más real
+            try { Thread.sleep(500); } catch (InterruptedException e) {}
+        }
+
+        // Llegó al destino
+        direccion = Direccion.DETENIDO;
+        System.out.println("Ascensor " + id + ": ¡Llegó al piso " + pisoActual + "!");
+        abrirPuerta();
+        cerrarPuerta();
+    }
+}
+
+// =
+// CONTROLELEVADOR.java - El cerebro del sistema
+// =
+/////
+ // Clase principal que controla todos los ascensores y toma decisiones.
+ // Esta es la clase más compleja que hice en mi vida como estudiante.
+ // Tuve que investigar algoritmos de scheduling para ascensores.
+ ///
+public class ControlElevador {
+    private final int totalPisos;
+    private final List<Elevador> elevadores = new ArrayList<>();
+    private final Map<Integer, BotonPiso> botonesPiso = new HashMap<>();
+
+    /////
+     // Constructor - inicializa el sistema completo
+     // @param totalPisos Cantidad de pisos del edificio
+     // @param cantidadElevadores Cantidad de ascensores disponibles
+     ///
+    public ControlElevador(int totalPisos, int cantidadElevadores) {
+        this.totalPisos = totalPisos;
+        
+        // Crear botones para cada piso
+        for (int i = 1; i <= totalPisos; i++) {
+            botonesPiso.put(i, new BotonPiso(i));
+        }
+        
+        // Crear los ascensores (todos empiezan en piso 1)
+        for (int i = 1; i <= cantidadElevadores; i++) {
+            elevadores.add(new Elevador(i, 1));
+        }
+        
+        System.out.println("Sistema inicializado con " + cantidadElevadores + 
+                          " ascensores y " + totalPisos + " pisos");
+    }
+
+    /////
+     // Procesa cuando alguien presiona un botón en un piso
+     // @param numeroPiso Piso desde donde llaman
+     // @param scanner Para leer input del usuario
+     // 
+     // Este método coordina todo el proceso:
+     // 1. Enciende el botón
+     // 2. Encuentra el mejor ascensor
+     // 3. Mueve el ascensor
+     // 4. Pide destino al usuario
+     // 5. Mueve al destino
+     ///
+    public void procesarSolicitudPiso(int numeroPiso, Scanner scanner) {
+        // Validar que el piso existe
+        if (numeroPiso < 1 || numeroPiso > totalPisos) {
+            System.out.println("❌ Piso inválido. Solo pisos del 1 al " + totalPisos);
+            return;
+        }
+
+        // Encender el botón del piso
+        botonesPiso.get(numeroPiso).encender();
+        System.out.println("🔴 Botón del piso " + numeroPiso + " iluminado!");
+
+        // Encontrar el mejor ascensor para atender la llamada
+        Elevador elegido = encontrarMejorElevador(numeroPiso);
+        if (elegido == null) {
+            System.out.println("❌ No se encontró elevador disponible.");
+            return;
+        }
+
+        System.out.println("✅ Ascensor " + elegido.getId() + " asignado");
+
+        // Mover el ascensor al piso de llamada
+        elegido.moverHasta(numeroPiso);
+
+        // Apagar el botón (ya llegó el ascensor)
+        apagarBotonPiso(numeroPiso);
+        System.out.println("⚫ Botón del piso " + numeroPiso + " apagado");
+
+        // Preguntar a dónde quiere ir el usuario
+        System.out.print("¿A qué piso desea ir? (1-" + totalPisos + "): ");
+        String input = scanner.nextLine().trim();
+        int destino;
+        try {
+            destino = Integer.parseInt(input);
+            if (destino < 1 || destino > totalPisos) {
+                System.out.println("❌ Piso destino inválido. Operación cancelada.");
+                return;
+            }
+        } catch (NumberFormatException ex) {
+            System.out.println("❌ Entrada inválida. Operación cancelada.");
+            return;
+        }
+
+        // Mover al destino
+        elegido.moverHasta(destino);
+        System.out.println("📝 El ascensor " + elegido.getId() + 
+                          " quedó en el piso " + elegido.getPisoActual());
+    }
+
+    /////
+     // ALGORITMO PRINCIPAL - Encuentra el mejor ascensor para una llamada
+     // @param pisoSolicitud Piso desde donde llaman
+     // @return El ascensor más adecuado
+     // 
+     // Este algoritmo me tomó 3 días pensarlo. Tiene 4 niveles de prioridad:
+     // 1. Ascensores que ya van en la dirección correcta
+     // 2. Ascensores detenidos con dirección compatible  
+     // 3. Cualquier ascensor detenido cercano
+     // 4. El ascensor más cercano sin importar estado
+     ///
+    public Elevador encontrarMejorElevador(int pisoSolicitud) {
+        String dirSolicitud = calcularDireccionAutomatica(pisoSolicitud);
+        System.out.println("Dirección inferida para piso " + pisoSolicitud + ": " + dirSolicitud);
+        
+        //  PRIORIDAD 1: Ascensores en movimiento en dirección correcta 
+        for (Elevador e : elevadores) {
+            if (dirSolicitud.equals("SUBIR") && 
+                e.getDireccion() == Elevador.Direccion.SUBIENDO && 
+                e.getPisoActual() <= pisoSolicitud) {
+                System.out.println("Prioridad 1: Ascensor " + e.getId() + " ya subiendo y pasa por el piso");
+                return e;
+            }
+            if (dirSolicitud.equals("BAJAR") && 
+                e.getDireccion() == Elevador.Direccion.BAJANDO && 
+                e.getPisoActual() >= pisoSolicitud) {
+                System.out.println("Prioridad 1: Ascensor " + e.getId() + " ya bajando y pasa por el piso");
+                return e;
+            }
+        }
+        
+        //  PRIORIDAD 2: Ascensores detenidos con dirección compatible 
+        Elevador mejor = null;
+        int mejorDist = Integer.MAX_VALUE;
+        for (Elevador e : elevadores) {
+            if (e.getDireccion() == Elevador.Direccion.DETENIDO) {
+                // Verificar si su última dirección es compatible con la solicitud
+                boolean compatibleUltima = false;
+                if (dirSolicitud.equals("BAJAR") && e.getUltimaDireccion() == Elevador.Direccion.BAJANDO) 
+                    compatibleUltima = true;
+                if (dirSolicitud.equals("SUBIR") && e.getUltimaDireccion() == Elevador.Direccion.SUBIENDO) 
+                    compatibleUltima = true;
+                
+                int distancia = Math.abs(e.getPisoActual() - pisoSolicitud);
+                if (compatibleUltima && distancia < mejorDist) {
+                    mejorDist = distancia;
+                    mejor = e;
+                }
+            }
+        }
+        if (mejor != null) {
+            System.out.println("Prioridad 2: Ascensor " + mejor.getId() + " detenido con dirección compatible");
+            return mejor;
+        }
+        
+        //  PRIORIDAD 3: Cualquier ascensor detenido (el más cercano) 
+        mejor = null;
+        mejorDist = Integer.MAX_VALUE;
+        for (Elevador e : elevadores) {
+            if (e.getDireccion() == Elevador.Direccion.DETENIDO) {
+                int distancia = Math.abs(e.getPisoActual() - pisoSolicitud);
+                if (distancia < mejorDist) {
+                    mejorDist = distancia;
+                    mejor = e;
+                }
+            }
+        }
+        if (mejor != null) {
+            System.out.println("Prioridad 3: Ascensor " + mejor.getId() + " detenido más cercano");
+            return mejor;
+        }
+        
+        //  PRIORIDAD 4: Último recurso - cualquier ascensor ()
+        mejor = null;
+        mejorDist = Integer.MAX_VALUE;
+        for (Elevador e : elevadores) {
+            int distancia = Math.abs(e.getPisoActual() - pisoSolicitud);
+            if (distancia < mejorDist) {
+                mejorDist = distancia;
+                mejor = e;
+            }
+        }
+        System.out.println("Prioridad 4: Ascensor " + mejor.getId() + " más cercano disponible");
+        return mejor;
+    }
+    
+    /////
+     // Calcula automáticamente si desde un piso probablemente quieren subir o bajar
+     // @param piso Piso desde donde llaman
+     // @return "SUBIR" o "BAJAR"
+     // 
+     // Esta es una simplificación porque en la vida real preguntaríamos al usuario.
+     // Pero como soy estudiante novato, inventé esta lógica basada en probabilidades.
+     ///
+    private String calcularDireccionAutomatica(int piso) {
+        // En el primer piso siempre quieren subir
+        if (piso == 1) return "SUBIR";
+        // En el último piso siempre quieren bajar  
+        if (piso == totalPisos) return "BAJAR";
+        
+        // Para pisos intermedios: los bajos probablemente suban, los altos bajen
+        int mitad = totalPisos / 2;
+        if (piso <= mitad) return "SUBIR";
+        return "BAJAR";
+    }
+
+    /////
+     // Apaga el botón de un piso específico
+     // @param piso Piso cuyo botón se debe apagar
+     ///
+    public void apagarBotonPiso(int piso) {
+        BotonPiso boton = botonesPiso.get(piso);
+        if (boton != null) boton.apagar();
+    }
+    // ES MUY BASICO PERO CREO QUE CUMPLE CON LO NECESARIO GRACIAS POR LEER ESPERO SE ENTENDIERA.......
+}
