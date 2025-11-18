@@ -31,7 +31,7 @@ java
 java
 // Solo se abre y se cierra
 
-¿Por qué es importante? → Aunque parece simple, es crucial para la seguridad. Sin puertas, la gente se caería por los huecos del ascensor 😅
+¿Por qué es importante? → Aunque parece simple, es crucial para la seguridad. Sin puertas, la gente se caería por los huecos del ascensor 
 
 6. Boton.java 
 
@@ -49,7 +49,7 @@ java
 ACLARACIÓN IMPORTANTE SOBRE ESTOS DOS:
 "Sé que BotonPiso y BotonElevador son casi iguales, pero los dejé así porque pensé: 'lo que funciona mejor, dejarlo quieto' jajaja. Además, en el futuro podrían tener funciones diferentes, y mejor tenerlas separadas desde ahora."
 
-🔄 Flujo Mágico del Sistema:
+ Flujo Mágico del Sistema:
 text
 Usuario → SistemaElevador → ControlElevador → (Algoritmo inteligente) → Elevador → Puerta
 
@@ -60,6 +60,7 @@ ejemplo de funcionamiento :
 <img width="1650" height="871" alt="Captura de pantalla (365)" src="https://github.com/user-attachments/assets/b54e03f3-dd5c-4ee9-be36-c3778e86dd0f" />
 
 CODIGO DOCUMENTADO ADJUNTO EN LA CARPETA DE DOCUMENTACION...........
+
 
 
 
