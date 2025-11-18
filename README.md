@@ -59,6 +59,8 @@ diagrama usado :
 ejemplo de funcionamiento : 
 <img width="1650" height="871" alt="Captura de pantalla (365)" src="https://github.com/user-attachments/assets/b54e03f3-dd5c-4ee9-be36-c3778e86dd0f" />
 
+CODIGO DOCUMENTADO ADJUNTO EN LA CARPETA DE DOCUMENTACION...........
+
 
 
 
